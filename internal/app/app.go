@@ -87,9 +87,15 @@ func (a *App) initServer() error {
 	userStorage := storage.NewUserStorage(a.db.DB)
 	userService := service.NewUserService(userStorage, jwtManager, a.logger)
 
+	tradingJournalStorage := storage.NewTradingJournalStorage(a.db.DB)
+	tradingJournalService := service.NewTradingJournalService(tradingJournalStorage, a.logger)
+
+	tradingJournalEntryStorage := storage.NewTradingJournalEntryStorage(a.db.DB)
+	tradingJournalEntryService := service.NewTradingJournalEntryService(tradingJournalEntryStorage, tradingJournalStorage, a.logger)
+
 	middleware := v1.NewMiddleware(a.logger, jwtManager, &a.cfg.CORS)
 	rateLimiter := v1.NewRateLimiter(&a.cfg.RateLimit, a.logger)
-	handler := v1.NewHandler(userService, a.logger, middleware, rateLimiter)
+	handler := v1.NewHandler(userService, tradingJournalService, tradingJournalEntryService, a.logger, middleware, rateLimiter)
 
 	router := handler.InitRoutes()
 

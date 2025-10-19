@@ -4,21 +4,33 @@ import (
 	"context"
 
 	"github.com/cockroachdb/errors"
+	"github.com/google/uuid"
 	"github.com/user/normark/internal/dto"
 	"github.com/user/normark/internal/entity"
-	"github.com/user/normark/internal/storage"
 	"github.com/user/normark/pkg/auth"
 	"go.uber.org/zap"
 )
 
+type UserStorage interface {
+	Create(ctx context.Context, user *entity.User) error
+	GetByID(ctx context.Context, id uuid.UUID) (*entity.User, error)
+	GetByEmail(ctx context.Context, email string) (*entity.User, error)
+	GetByUsername(ctx context.Context, username string) (*entity.User, error)
+	Update(ctx context.Context, user *entity.User) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	List(ctx context.Context, limit, offset int) ([]*entity.User, error)
+	Count(ctx context.Context) (int, error)
+	Exists(ctx context.Context, email, username string) (bool, error)
+}
+
 type UserService struct {
-	storage    *storage.UserStorage
+	storage    UserStorage
 	jwtManager *auth.JWTManager
 	logger     *zap.Logger
 }
 
 func NewUserService(
-	storage *storage.UserStorage,
+	storage UserStorage,
 	jwtManager *auth.JWTManager,
 	logger *zap.Logger,
 ) *UserService {

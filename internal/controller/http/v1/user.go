@@ -1,23 +1,28 @@
 package v1
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/user/normark/internal/dto"
-	"github.com/user/normark/internal/service"
 	"go.uber.org/zap"
 )
 
+type UserService interface {
+	SignUp(ctx context.Context, req *dto.SignUpRequest) (*dto.AuthResponse, error)
+	SignIn(ctx context.Context, req *dto.SignInRequest) (*dto.AuthResponse, error)
+}
+
 type UserHandler struct {
-	userService *service.UserService
+	userService UserService
 	logger      *zap.Logger
 	validate    *validator.Validate
 }
 
 func NewUserHandler(
-	userService *service.UserService,
+	userService UserService,
 	logger *zap.Logger,
 	validate *validator.Validate,
 ) *UserHandler {
@@ -33,6 +38,17 @@ func (h *UserHandler) InitRoutes(group *gin.RouterGroup) {
 	group.POST("/sign-in", h.SignIn)
 }
 
+// SignUp godoc
+// @Summary      Register a new user
+// @Description  Create a new user account with email, username and password
+// @Tags         Authentication
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.SignUpRequest true "User registration details"
+// @Success      201 {object} dto.AuthResponse "Successfully registered user with access and refresh tokens"
+// @Failure      400 {object} ErrorResponse "Invalid request body or validation failed"
+// @Failure      500 {object} ErrorResponse "Internal server error"
+// @Router       /api/v1/auth/sign-up [post]
 func (h *UserHandler) SignUp(c *gin.Context) {
 	var req dto.SignUpRequest
 
@@ -58,6 +74,17 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
+// SignIn godoc
+// @Summary      User login
+// @Description  Authenticate user with email and password
+// @Tags         Authentication
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.SignInRequest true "User login credentials"
+// @Success      200 {object} dto.AuthResponse "Successfully authenticated with access and refresh tokens"
+// @Failure      400 {object} ErrorResponse "Invalid request body or validation failed"
+// @Failure      401 {object} ErrorResponse "Invalid credentials"
+// @Router       /api/v1/auth/sign-in [post]
 func (h *UserHandler) SignIn(c *gin.Context) {
 	var req dto.SignInRequest
 

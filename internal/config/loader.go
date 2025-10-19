@@ -27,3 +27,11 @@ func (c *Postgres) ConnectionString() string {
 		c.SSLMode,
 	)
 }
+
+func (a *App) IsProduction() bool {
+	return a.Environment == "production"
+}
+
+func (a *App) IsDevelopment() bool {
+	return a.Environment == "development"
+}

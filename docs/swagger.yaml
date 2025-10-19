@@ -1,0 +1,964 @@
+basePath: /
+definitions:
+  dto.AuthResponse:
+    properties:
+      access_token:
+        type: string
+      expires_at:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  dto.CreateTradingJournalEntryRequest:
+    properties:
+      asset:
+        $ref: '#/definitions/types.CurrencyPair'
+      day:
+        type: string
+      direction:
+        $ref: '#/definitions/types.TradeDirection'
+      entry_charts:
+        items:
+          type: string
+        type: array
+      entry_type:
+        $ref: '#/definitions/types.EntryType'
+      htf:
+        $ref: '#/definitions/types.TimeFrame'
+      ltf:
+        $ref: '#/definitions/types.TimeFrame'
+      max_rr:
+        type: number
+      notes:
+        maxLength: 5000
+        type: string
+      realized:
+        type: number
+      result:
+        $ref: '#/definitions/types.TradeResult'
+      session:
+        $ref: '#/definitions/types.TradingSession'
+      setup:
+        maxLength: 500
+        type: string
+      trade_type:
+        $ref: '#/definitions/types.TradeType'
+    required:
+    - asset
+    - day
+    - direction
+    - entry_type
+    - htf
+    - ltf
+    - max_rr
+    - realized
+    - result
+    - session
+    - trade_type
+    type: object
+  dto.CreateTradingJournalRequest:
+    properties:
+      description:
+        maxLength: 1000
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - name
+    type: object
+  dto.SignInRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.SignUpRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  dto.TradingJournalEntryListResponse:
+    properties:
+      entries:
+        items:
+          $ref: '#/definitions/dto.TradingJournalEntryResponse'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.TradingJournalEntryResponse:
+    properties:
+      asset:
+        $ref: '#/definitions/types.CurrencyPair'
+      created_at:
+        type: string
+      day:
+        type: string
+      direction:
+        $ref: '#/definitions/types.TradeDirection'
+      entry_charts:
+        items:
+          type: string
+        type: array
+      entry_type:
+        $ref: '#/definitions/types.EntryType'
+      htf:
+        $ref: '#/definitions/types.TimeFrame'
+      id:
+        type: string
+      journal_id:
+        type: string
+      ltf:
+        $ref: '#/definitions/types.TimeFrame'
+      max_rr:
+        type: number
+      notes:
+        type: string
+      realized:
+        type: number
+      result:
+        $ref: '#/definitions/types.TradeResult'
+      session:
+        $ref: '#/definitions/types.TradingSession'
+      setup:
+        type: string
+      trade_type:
+        $ref: '#/definitions/types.TradeType'
+      updated_at:
+        type: string
+    type: object
+  dto.TradingJournalListResponse:
+    properties:
+      journals:
+        items:
+          $ref: '#/definitions/dto.TradingJournalResponse'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.TradingJournalResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  dto.TradingJournalStatisticsResponse:
+    properties:
+      avg_risk_reward:
+        type: number
+      break_even:
+        type: integer
+      losses:
+        type: integer
+      total_realized:
+        type: number
+      total_trades:
+        type: integer
+      win_rate:
+        type: number
+      wins:
+        type: integer
+    type: object
+  dto.TradingJournalWithEntriesResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      entries:
+        items:
+          $ref: '#/definitions/dto.TradingJournalEntryResponse'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  dto.UpdateTradingJournalEntryRequest:
+    properties:
+      asset:
+        $ref: '#/definitions/types.CurrencyPair'
+      day:
+        type: string
+      direction:
+        $ref: '#/definitions/types.TradeDirection'
+      entry_charts:
+        items:
+          type: string
+        type: array
+      entry_type:
+        $ref: '#/definitions/types.EntryType'
+      htf:
+        $ref: '#/definitions/types.TimeFrame'
+      ltf:
+        $ref: '#/definitions/types.TimeFrame'
+      max_rr:
+        type: number
+      notes:
+        maxLength: 5000
+        type: string
+      realized:
+        type: number
+      result:
+        $ref: '#/definitions/types.TradeResult'
+      session:
+        $ref: '#/definitions/types.TradingSession'
+      setup:
+        maxLength: 500
+        type: string
+      trade_type:
+        $ref: '#/definitions/types.TradeType'
+    required:
+    - asset
+    - day
+    - direction
+    - entry_type
+    - htf
+    - ltf
+    - max_rr
+    - realized
+    - result
+    - session
+    - trade_type
+    type: object
+  dto.UpdateTradingJournalRequest:
+    properties:
+      description:
+        maxLength: 1000
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - name
+    type: object
+  types.CurrencyPair:
+    enum:
+    - EURUSD
+    - GBPUSD
+    - USDJPY
+    - USDCHF
+    - AUDUSD
+    - USDCAD
+    - NZDUSD
+    - EURGBP
+    - EURJPY
+    - GBPJPY
+    - EURCHF
+    - EURAUD
+    - EURCAD
+    - GBPCHF
+    - GBPAUD
+    - GBPCAD
+    - USDTRY
+    - USDMXN
+    - USDZAR
+    - USDNOK
+    - USDSEK
+    type: string
+    x-enum-varnames:
+    - CurrencyPairEURUSD
+    - CurrencyPairGBPUSD
+    - CurrencyPairUSDJPY
+    - CurrencyPairUSDCHF
+    - CurrencyPairAUDUSD
+    - CurrencyPairUSDCAD
+    - CurrencyPairNZDUSD
+    - CurrencyPairEURGBP
+    - CurrencyPairEURJPY
+    - CurrencyPairGBPJPY
+    - CurrencyPairEURCHF
+    - CurrencyPairEURAUD
+    - CurrencyPairEURCAD
+    - CurrencyPairGBPCHF
+    - CurrencyPairGBPAUD
+    - CurrencyPairGBPCAD
+    - CurrencyPairUSDTRY
+    - CurrencyPairUSDMXN
+    - CurrencyPairUSDZAR
+    - CurrencyPairUSDNOK
+    - CurrencyPairUSDSEK
+  types.EntryType:
+    enum:
+    - market
+    - limit
+    type: string
+    x-enum-varnames:
+    - EntryTypeMarket
+    - EntryTypeLimit
+  types.TimeFrame:
+    enum:
+    - 1M
+    - 5M
+    - 15M
+    - 30M
+    - 1H
+    - 4H
+    - 1D
+    - 1W
+    - 1MO
+    type: string
+    x-enum-varnames:
+    - TimeFrame1M
+    - TimeFrame5M
+    - TimeFrame15M
+    - TimeFrame30M
+    - TimeFrame1H
+    - TimeFrame4H
+    - TimeFrame1D
+    - TimeFrame1W
+    - TimeFrame1MO
+  types.TradeDirection:
+    enum:
+    - buy
+    - sell
+    type: string
+    x-enum-varnames:
+    - TradeDirectionBuy
+    - TradeDirectionSell
+  types.TradeResult:
+    enum:
+    - TP
+    - SL
+    - BE
+    type: string
+    x-enum-comments:
+      TradeResultBreakEven: Break Even
+      TradeResultStopLoss: Stop Loss
+      TradeResultTakeProfit: Take Profit
+    x-enum-descriptions:
+    - Take Profit
+    - Stop Loss
+    - Break Even
+    x-enum-varnames:
+    - TradeResultTakeProfit
+    - TradeResultStopLoss
+    - TradeResultBreakEven
+  types.TradeType:
+    enum:
+    - swing
+    - intraday
+    type: string
+    x-enum-varnames:
+    - TradeTypeSwing
+    - TradeTypeIntraday
+  types.TradingSession:
+    enum:
+    - asia
+    - london
+    - new_york
+    type: string
+    x-enum-varnames:
+    - TradingSessionAsia
+    - TradingSessionLondon
+    - TradingSessionNewYork
+  v1.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@normark.com
+    name: API Support
+  description: A comprehensive trading journal API for tracking and analyzing trading
+    performance
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Normark Trading Journal API
+  version: "1.0"
+paths:
+  /api/v1/auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: User login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully authenticated with access and refresh tokens
+          schema:
+            $ref: '#/definitions/dto.AuthResponse'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: User login
+      tags:
+      - Authentication
+  /api/v1/auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account with email, username and password
+      parameters:
+      - description: User registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully registered user with access and refresh tokens
+          schema:
+            $ref: '#/definitions/dto.AuthResponse'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - Authentication
+  /api/v1/journals:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of all trading journals for the authenticated
+        user
+      parameters:
+      - description: 'Maximum number of journals to return (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of journals to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved journals list
+          schema:
+            $ref: '#/definitions/dto.TradingJournalListResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List user's trading journals
+      tags:
+      - Trading Journals
+    post:
+      consumes:
+      - application/json
+      description: Create a new trading journal for the authenticated user
+      parameters:
+      - description: Trading journal details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTradingJournalRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created trading journal
+          schema:
+            $ref: '#/definitions/dto.TradingJournalResponse'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new trading journal
+      tags:
+      - Trading Journals
+  /api/v1/journals/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a trading journal and all its associated entries
+      parameters:
+      - description: Trading Journal ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted journal
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid journal ID
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error or access denied
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete trading journal
+      tags:
+      - Trading Journals
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific trading journal by its ID
+      parameters:
+      - description: Trading Journal ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved trading journal
+          schema:
+            $ref: '#/definitions/dto.TradingJournalResponse'
+        "400":
+          description: Invalid journal ID
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Journal not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get trading journal by ID
+      tags:
+      - Trading Journals
+    put:
+      consumes:
+      - application/json
+      description: Update an existing trading journal's name and description
+      parameters:
+      - description: Trading Journal ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated journal details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateTradingJournalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated trading journal
+          schema:
+            $ref: '#/definitions/dto.TradingJournalResponse'
+        "400":
+          description: Invalid request body, validation failed, or invalid journal
+            ID
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Journal not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update trading journal
+      tags:
+      - Trading Journals
+  /api/v1/journals/{id}/entries:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of all entries for a specific trading journal
+      parameters:
+      - description: Trading Journal ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 'Maximum number of entries to return (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Number of entries to skip (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved entries list
+          schema:
+            $ref: '#/definitions/dto.TradingJournalEntryListResponse'
+        "400":
+          description: Invalid journal ID
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List trading journal entries
+      tags:
+      - Trading Journal Entries
+    post:
+      consumes:
+      - application/json
+      description: Create a new trade entry in a specific trading journal
+      parameters:
+      - description: Trading Journal ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Trading entry details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTradingJournalEntryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created trading entry
+          schema:
+            $ref: '#/definitions/dto.TradingJournalEntryResponse'
+        "400":
+          description: Invalid request body, validation failed, or invalid journal
+            ID
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new trading journal entry
+      tags:
+      - Trading Journal Entries
+  /api/v1/journals/{id}/entries/{entryId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific trading journal entry
+      parameters:
+      - description: Trading Journal ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Trading Entry ID (UUID)
+        in: path
+        name: entryId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted entry
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid journal ID or entry ID
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error or access denied
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete trading journal entry
+      tags:
+      - Trading Journal Entries
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific trading journal entry by its ID
+      parameters:
+      - description: Trading Journal ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Trading Entry ID (UUID)
+        in: path
+        name: entryId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved trading entry
+          schema:
+            $ref: '#/definitions/dto.TradingJournalEntryResponse'
+        "400":
+          description: Invalid journal ID or entry ID
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "403":
+          description: Access denied - entry does not belong to journal
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Entry not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get trading journal entry by ID
+      tags:
+      - Trading Journal Entries
+    put:
+      consumes:
+      - application/json
+      description: Update an existing trading journal entry
+      parameters:
+      - description: Trading Journal ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Trading Entry ID (UUID)
+        in: path
+        name: entryId
+        required: true
+        type: string
+      - description: Updated entry details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateTradingJournalEntryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated trading entry
+          schema:
+            $ref: '#/definitions/dto.TradingJournalEntryResponse'
+        "400":
+          description: Invalid request body, validation failed, invalid journal ID,
+            or invalid entry ID
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "403":
+          description: Access denied - entry does not belong to journal
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Entry not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update trading journal entry
+      tags:
+      - Trading Journal Entries
+  /api/v1/journals/{id}/entries/statistics:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve statistical data for a specific trading journal including
+        win rate, total trades, and performance metrics
+      parameters:
+      - description: Trading Journal ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved journal statistics
+          schema:
+            $ref: '#/definitions/dto.TradingJournalStatisticsResponse'
+        "400":
+          description: Invalid journal ID
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get trading journal statistics
+      tags:
+      - Trading Journal Entries
+  /api/v1/journals/{id}/with-entries:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific trading journal by its ID including all associated
+        entries
+      parameters:
+      - description: Trading Journal ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved trading journal with entries
+          schema:
+            $ref: '#/definitions/dto.TradingJournalWithEntriesResponse'
+        "400":
+          description: Invalid journal ID
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "404":
+          description: Journal not found
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get trading journal with entries
+      tags:
+      - Trading Journals
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

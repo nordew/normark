@@ -1,11 +1,16 @@
 package config
 
 type Config struct {
+	App       App
 	Server    Server
 	Postgres  Postgres
 	JWT       JWT
 	CORS      CORS
 	RateLimit RateLimit
+}
+
+type App struct {
+	Environment string `env:"APP_ENV" envDefault:"development"`
 }
 
 type Server struct {

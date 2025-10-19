@@ -1,0 +1,461 @@
+{
+  "info": {
+    "name": "Normark Trading Journal API",
+    "description": "Complete API collection for testing all Normark Trading Journal endpoints including authentication, journals, and trade entries.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "journal_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "entry_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Sign Up",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"access_token\", response.access_token);",
+                  "    pm.collectionVariables.set(\"refresh_token\", response.refresh_token);",
+                  "    pm.test(\"Access token saved\", function () {",
+                  "        pm.expect(response.access_token).to.not.be.empty;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"trader@example.com\",\n  \"username\": \"trader123\",\n  \"password\": \"SecureP@ssw0rd\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/sign-up",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "sign-up"]
+            },
+            "description": "Register a new user account with email, username and password. Minimum password length is 8 characters."
+          },
+          "response": []
+        },
+        {
+          "name": "Sign In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"access_token\", response.access_token);",
+                  "    pm.collectionVariables.set(\"refresh_token\", response.refresh_token);",
+                  "    pm.test(\"Access token saved\", function () {",
+                  "        pm.expect(response.access_token).to.not.be.empty;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"trader@example.com\",\n  \"password\": \"SecureP@ssw0rd\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/sign-in",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "sign-in"]
+            },
+            "description": "Authenticate with email and password. Returns access and refresh tokens."
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints for user registration and login"
+    },
+    {
+      "name": "Trading Journals",
+      "item": [
+        {
+          "name": "Create Journal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"journal_id\", response.id);",
+                  "    pm.test(\"Journal ID saved\", function () {",
+                  "        pm.expect(response.id).to.not.be.empty;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Q1 2024 Forex Trading\",\n  \"description\": \"Trading journal for Q1 2024 focusing on EUR/USD and GBP/USD pairs\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals"]
+            },
+            "description": "Create a new trading journal for the authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "List Journals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals?limit=20&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Maximum number of journals to return (default: 20, max: 100)"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Number of journals to skip (default: 0)"
+                }
+              ]
+            },
+            "description": "Get a paginated list of all trading journals for the authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Journal by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}"]
+            },
+            "description": "Retrieve a specific trading journal by its ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Journal with Entries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}/with-entries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}", "with-entries"]
+            },
+            "description": "Retrieve a specific trading journal by its ID including all associated entries"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Journal",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Q1 2024 Forex Trading - Updated\",\n  \"description\": \"Updated description for Q1 2024 trading journal\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}"]
+            },
+            "description": "Update an existing trading journal's name and description"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Journal",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}"]
+            },
+            "description": "Delete a trading journal and all its associated entries"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for managing trading journals"
+    },
+    {
+      "name": "Trading Journal Entries",
+      "item": [
+        {
+          "name": "Create Entry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"entry_id\", response.id);",
+                  "    pm.test(\"Entry ID saved\", function () {",
+                  "        pm.expect(response.id).to.not.be.empty;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"day\": \"2024-01-15T00:00:00Z\",\n  \"asset\": \"EURUSD\",\n  \"ltf\": \"15M\",\n  \"htf\": \"4H\",\n  \"entry_charts\": [\n    \"https://example.com/chart1.png\"\n  ],\n  \"session\": \"london\",\n  \"trade_type\": \"intraday\",\n  \"setup\": \"Break of structure with volume confirmation\",\n  \"direction\": \"buy\",\n  \"entry_type\": \"limit\",\n  \"realized\": 2.5,\n  \"max_rr\": 3.0,\n  \"result\": \"TP\",\n  \"notes\": \"Clean entry with strong momentum. Held position through minor pullback.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}/entries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}", "entries"]
+            },
+            "description": "Create a new trade entry in a specific trading journal"
+          },
+          "response": []
+        },
+        {
+          "name": "List Entries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}/entries?limit=20&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}", "entries"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Maximum number of entries to return (default: 20, max: 100)"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Number of entries to skip (default: 0)"
+                }
+              ]
+            },
+            "description": "Get a paginated list of all entries for a specific trading journal"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Entry by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}/entries/{{entry_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}", "entries", "{{entry_id}}"]
+            },
+            "description": "Retrieve a specific trading journal entry by its ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}/entries/statistics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}", "entries", "statistics"]
+            },
+            "description": "Retrieve statistical data for a specific trading journal including win rate, total trades, and performance metrics"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Entry",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"day\": \"2024-01-15T00:00:00Z\",\n  \"asset\": \"EURUSD\",\n  \"ltf\": \"15M\",\n  \"htf\": \"4H\",\n  \"entry_charts\": [\n    \"https://example.com/chart1.png\",\n    \"https://example.com/chart2.png\"\n  ],\n  \"session\": \"london\",\n  \"trade_type\": \"intraday\",\n  \"setup\": \"Break of structure with volume confirmation - Updated\",\n  \"direction\": \"buy\",\n  \"entry_type\": \"limit\",\n  \"realized\": 2.8,\n  \"max_rr\": 3.0,\n  \"result\": \"TP\",\n  \"notes\": \"Updated notes: Clean entry with strong momentum.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}/entries/{{entry_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}", "entries", "{{entry_id}}"]
+            },
+            "description": "Update an existing trading journal entry"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Entry",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}/entries/{{entry_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}", "entries", "{{entry_id}}"]
+            },
+            "description": "Delete a specific trading journal entry"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Entry - GBP/USD Example",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"day\": \"2024-01-16T00:00:00Z\",\n  \"asset\": \"GBPUSD\",\n  \"ltf\": \"5M\",\n  \"htf\": \"1H\",\n  \"entry_charts\": [],\n  \"session\": \"new_york\",\n  \"trade_type\": \"swing\",\n  \"setup\": \"Double bottom pattern with divergence\",\n  \"direction\": \"sell\",\n  \"entry_type\": \"market\",\n  \"realized\": -1.0,\n  \"max_rr\": 2.5,\n  \"result\": \"SL\",\n  \"notes\": \"Stop loss hit due to news event.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}/entries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}", "entries"]
+            },
+            "description": "Example of creating a losing trade entry for GBP/USD"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Entry - USD/JPY Example",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"day\": \"2024-01-17T00:00:00Z\",\n  \"asset\": \"USDJPY\",\n  \"ltf\": \"30M\",\n  \"htf\": \"1D\",\n  \"entry_charts\": [],\n  \"session\": \"asia\",\n  \"trade_type\": \"intraday\",\n  \"setup\": null,\n  \"direction\": \"buy\",\n  \"entry_type\": \"limit\",\n  \"realized\": 0.0,\n  \"max_rr\": 2.0,\n  \"result\": \"BE\",\n  \"notes\": \"Moved stop loss to break even, position closed at entry.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/journals/{{journal_id}}/entries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "journals", "{{journal_id}}", "entries"]
+            },
+            "description": "Example of creating a break-even trade entry for USD/JPY"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for managing trading journal entries and viewing statistics"
+    }
+  ]
+}

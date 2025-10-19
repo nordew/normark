@@ -1,0 +1,70 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.example
+
+# Documentation
+*.md
+!README.md
+docs/
+DOCKER.md
+JOURNAL_ROUTES_SETUP.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-*
+
+# Dependencies
+vendor/
+
+# Build artifacts
+bin/
+dist/
+tmp/
+build/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing
+coverage.txt
+coverage.html
+*.test
+*.out
+
+# Temporary files
+*.tmp
+*.bak
+
+# Docker files (don't copy these into image)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Makefile
+Makefile
+
+# Air (hot reload)
+.air.toml
+tmp/

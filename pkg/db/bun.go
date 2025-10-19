@@ -11,7 +11,6 @@ import (
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/extra/bundebug"
 	"github.com/user/normark/internal/config"
-	"github.com/user/normark/internal/entity"
 )
 
 const (
@@ -71,11 +70,6 @@ func NewPostgresConnection(ctx context.Context, cfg *config.Postgres) (*DB, erro
 
 	db := &DB{DB: bunDB}
 
-	if err := db.AutoMigrate(ctx); err != nil {
-		sqlDB.Close()
-		return nil, fmt.Errorf("failed to run auto-migration: %w", err)
-	}
-
 	return db, nil
 }
 
@@ -93,28 +87,6 @@ func (db *DB) HealthCheck(ctx context.Context) error {
 
 	if err := db.PingContext(ctx); err != nil {
 		return fmt.Errorf("database health check failed: %w", err)
-	}
-
-	return nil
-}
-
-func (db *DB) AutoMigrate(ctx context.Context) error {
-	models := []any{
-		(*entity.User)(nil),
-	}
-
-	if _, err := db.ExecContext(ctx, "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\""); err != nil {
-		return fmt.Errorf("failed to create uuid-ossp extension: %w", err)
-	}
-
-	if _, err := db.ExecContext(ctx, "CREATE EXTENSION IF NOT EXISTS pgcrypto"); err != nil {
-		return fmt.Errorf("failed to create pgcrypto extension: %w", err)
-	}
-
-	for _, model := range models {
-		if _, err := db.NewCreateTable().Model(model).IfNotExists().Exec(ctx); err != nil {
-			return fmt.Errorf("failed to create table: %w", err)
-		}
 	}
 
 	return nil
