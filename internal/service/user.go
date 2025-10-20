@@ -49,7 +49,7 @@ func (s *UserService) SignUp(ctx context.Context, req *dto.SignUpRequest) (*dto.
 	}
 
 	if exists {
-		return nil, errors.New("user with this email or username already exists")
+		return nil, entity.ErrUserAlreadyExists
 	}
 
 	user, err := entity.NewUserFromSignUp(req)
@@ -84,12 +84,12 @@ func (s *UserService) SignIn(ctx context.Context, req *dto.SignInRequest) (*dto.
 	user, err := s.storage.GetByEmail(ctx, req.Email)
 	if err != nil {
 		s.logger.Error("failed to get user by email", zap.Error(err))
-		return nil, errors.Wrap(err, "invalid email or password")
+		return nil, entity.ErrInvalidCredentials
 	}
 
 	if err := user.ComparePassword(req.Password); err != nil {
 		s.logger.Error("invalid password attempt", zap.String("email", req.Email))
-		return nil, errors.New("invalid email or password")
+		return nil, entity.ErrInvalidCredentials
 	}
 
 	tokens, err := s.jwtManager.GenerateTokenPair(user.ID, user.Email, user.Username)

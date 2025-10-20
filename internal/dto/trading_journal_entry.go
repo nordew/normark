@@ -10,8 +10,8 @@ import (
 type CreateTradingJournalEntryRequest struct {
 	Day         time.Time              `json:"day" validate:"required"`
 	Asset       types.CurrencyPair     `json:"asset" validate:"required"`
-	LTF         types.TimeFrame        `json:"ltf" validate:"required"`
-	HTF         types.TimeFrame        `json:"htf" validate:"required"`
+	LTF         string                 `json:"ltf" validate:"required,url"`
+	HTF         string                 `json:"htf" validate:"required,url"`
 	EntryCharts []string               `json:"entry_charts" validate:"omitempty,dive,url"`
 	Session     types.TradingSession   `json:"session" validate:"required"`
 	TradeType   types.TradeType        `json:"trade_type" validate:"required"`
@@ -27,8 +27,8 @@ type CreateTradingJournalEntryRequest struct {
 type UpdateTradingJournalEntryRequest struct {
 	Day         time.Time              `json:"day" validate:"required"`
 	Asset       types.CurrencyPair     `json:"asset" validate:"required"`
-	LTF         types.TimeFrame        `json:"ltf" validate:"required"`
-	HTF         types.TimeFrame        `json:"htf" validate:"required"`
+	LTF         string                 `json:"ltf" validate:"required,url"`
+	HTF         string                 `json:"htf" validate:"required,url"`
 	EntryCharts []string               `json:"entry_charts" validate:"omitempty,dive,url"`
 	Session     types.TradingSession   `json:"session" validate:"required"`
 	TradeType   types.TradeType        `json:"trade_type" validate:"required"`
@@ -46,8 +46,8 @@ type TradingJournalEntryResponse struct {
 	JournalID   uuid.UUID              `json:"journal_id"`
 	Day         time.Time              `json:"day"`
 	Asset       types.CurrencyPair     `json:"asset"`
-	LTF         types.TimeFrame        `json:"ltf"`
-	HTF         types.TimeFrame        `json:"htf"`
+	LTF         string                 `json:"ltf"`
+	HTF         string                 `json:"htf"`
 	EntryCharts []string               `json:"entry_charts"`
 	Session     types.TradingSession   `json:"session"`
 	TradeType   types.TradeType        `json:"trade_type"`

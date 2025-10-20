@@ -15,8 +15,8 @@ type TradingJournalEntry struct {
 	JournalID   uuid.UUID            `bun:"journal_id,notnull,type:uuid"`
 	Day         time.Time            `bun:"day,notnull"`
 	Asset       types.CurrencyPair   `bun:"asset,notnull"`
-	LTF         types.TimeFrame      `bun:"ltf,notnull"`
-	HTF         types.TimeFrame      `bun:"htf,notnull"`
+	LTF         string               `bun:"ltf,notnull"`
+	HTF         string               `bun:"htf,notnull"`
 	EntryCharts []string             `bun:"entry_charts,array,type:text[]"`
 	Session     types.TradingSession `bun:"session,notnull"`
 	TradeType   types.TradeType      `bun:"trade_type,notnull"`
@@ -38,7 +38,7 @@ func NewTradingJournalEntry(
 	journalID uuid.UUID,
 	day time.Time,
 	asset types.CurrencyPair,
-	ltf, htf types.TimeFrame,
+	ltf, htf string,
 	entryCharts []string,
 	session types.TradingSession,
 	tradeType types.TradeType,
@@ -77,11 +77,11 @@ func (tje *TradingJournalEntry) Validate() error {
 		return ErrInvalidAsset
 	}
 
-	if !tje.LTF.IsValid() {
+	if tje.LTF == "" {
 		return ErrInvalidLTF
 	}
 
-	if !tje.HTF.IsValid() {
+	if tje.HTF == "" {
 		return ErrInvalidHTF
 	}
 

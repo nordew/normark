@@ -4,9 +4,11 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/cockroachdb/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/user/normark/internal/dto"
+	"github.com/user/normark/internal/entity"
 	"go.uber.org/zap"
 )
 
@@ -47,6 +49,7 @@ func (h *UserHandler) InitRoutes(group *gin.RouterGroup) {
 // @Param        request body dto.SignUpRequest true "User registration details"
 // @Success      201 {object} dto.AuthResponse "Successfully registered user with access and refresh tokens"
 // @Failure      400 {object} ErrorResponse "Invalid request body or validation failed"
+// @Failure      409 {object} ErrorResponse "User with this email or username already exists"
 // @Failure      500 {object} ErrorResponse "Internal server error"
 // @Router       /api/v1/auth/sign-up [post]
 func (h *UserHandler) SignUp(c *gin.Context) {
@@ -67,6 +70,10 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 	response, err := h.userService.SignUp(c.Request.Context(), &req)
 	if err != nil {
 		h.logger.Error("failed to sign up user", zap.Error(err))
+		if errors.Is(err, entity.ErrUserAlreadyExists) {
+			newErrorResponse(c, http.StatusConflict, err.Error())
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -84,6 +91,7 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 // @Success      200 {object} dto.AuthResponse "Successfully authenticated with access and refresh tokens"
 // @Failure      400 {object} ErrorResponse "Invalid request body or validation failed"
 // @Failure      401 {object} ErrorResponse "Invalid credentials"
+// @Failure      500 {object} ErrorResponse "Internal server error"
 // @Router       /api/v1/auth/sign-in [post]
 func (h *UserHandler) SignIn(c *gin.Context) {
 	var req dto.SignInRequest
@@ -103,7 +111,11 @@ func (h *UserHandler) SignIn(c *gin.Context) {
 	response, err := h.userService.SignIn(c.Request.Context(), &req)
 	if err != nil {
 		h.logger.Error("failed to sign in user", zap.Error(err))
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		if errors.Is(err, entity.ErrInvalidCredentials) {
+			newErrorResponse(c, http.StatusUnauthorized, err.Error())
+			return
+		}
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
