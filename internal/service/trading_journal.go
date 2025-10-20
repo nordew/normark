@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"time"
 
 	"github.com/cockroachdb/errors"
 	"github.com/google/uuid"
@@ -25,6 +28,7 @@ type TradingJournalStorage interface {
 
 type TradingJournalService struct {
 	storage TradingJournalStorage
+	cache   Cache
 	logger  *zap.Logger
 }
 
@@ -36,6 +40,11 @@ func NewTradingJournalService(
 		storage: storage,
 		logger:  logger,
 	}
+}
+
+func (s *TradingJournalService) WithCache(cache Cache) *TradingJournalService {
+	s.cache = cache
+	return s
 }
 
 func (s *TradingJournalService) Create(ctx context.Context, userID uuid.UUID, req *dto.CreateTradingJournalRequest) (*entity.TradingJournal, error) {
@@ -55,10 +64,33 @@ func (s *TradingJournalService) Create(ctx context.Context, userID uuid.UUID, re
 }
 
 func (s *TradingJournalService) GetByID(ctx context.Context, id uuid.UUID) (*entity.TradingJournal, error) {
+	cacheKey := fmt.Sprintf("journal:%s", id.String())
+
+	// Try to get from cache first
+	if s.cache != nil {
+		cached, err := s.cache.Get(ctx, cacheKey)
+		if err == nil && cached != "" {
+			var journal entity.TradingJournal
+			if err := json.Unmarshal([]byte(cached), &journal); err == nil {
+				return &journal, nil
+			}
+		}
+	}
+
+	// Cache miss or error, fetch from database
 	journal, err := s.storage.GetByID(ctx, id)
 	if err != nil {
 		s.logger.Error("failed to get trading journal by id", zap.Error(err), zap.String("id", id.String()))
 		return nil, errors.Wrap(err, "failed to get trading journal")
+	}
+
+	// Cache the result
+	if s.cache != nil {
+		if data, err := json.Marshal(journal); err == nil {
+			if err := s.cache.Set(ctx, cacheKey, string(data), 15*time.Minute); err != nil {
+				s.logger.Warn("failed to cache trading journal", zap.Error(err))
+			}
+		}
 	}
 
 	return journal, nil
@@ -95,6 +127,13 @@ func (s *TradingJournalService) Update(ctx context.Context, journal *entity.Trad
 		return errors.Wrap(err, "failed to update trading journal")
 	}
 
+	if s.cache != nil {
+		cacheKey := fmt.Sprintf("journal:%s", journal.ID.String())
+		if err := s.cache.Delete(ctx, cacheKey); err != nil {
+			s.logger.Warn("failed to invalidate cache after update", zap.Error(err))
+		}
+	}
+
 	return nil
 }
 
@@ -112,6 +151,13 @@ func (s *TradingJournalService) Delete(ctx context.Context, id uuid.UUID, userID
 	if err := s.storage.Delete(ctx, id); err != nil {
 		s.logger.Error("failed to delete trading journal", zap.Error(err), zap.String("id", id.String()))
 		return errors.Wrap(err, "failed to delete trading journal")
+	}
+
+	if s.cache != nil {
+		cacheKey := fmt.Sprintf("journal:%s", id.String())
+		if err := s.cache.Delete(ctx, cacheKey); err != nil {
+			s.logger.Warn("failed to invalidate cache after delete", zap.Error(err))
+		}
 	}
 
 	return nil

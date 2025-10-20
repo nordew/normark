@@ -3,7 +3,11 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
 	"go.uber.org/zap"
+
+	_ "github.com/user/normark/docs"
 )
 
 type Handler struct {
@@ -14,6 +18,7 @@ type Handler struct {
 	validate                   *validator.Validate
 	middleware                 *Middleware
 	rateLimiter                *RateLimiter
+	environment                string
 }
 
 func NewHandler(
@@ -23,6 +28,7 @@ func NewHandler(
 	logger *zap.Logger,
 	middleware *Middleware,
 	rateLimiter *RateLimiter,
+	environment string,
 ) *Handler {
 	return &Handler{
 		userService:                userService,
@@ -32,6 +38,7 @@ func NewHandler(
 		validate:                   validator.New(),
 		middleware:                 middleware,
 		rateLimiter:                rateLimiter,
+		environment:                environment,
 	}
 }
 
@@ -39,6 +46,12 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
 	h.setupMiddleware(router)
+
+	// Add Swagger endpoint only in non-production environments
+	if h.environment != "production" {
+		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		h.logger.Info("Swagger documentation enabled", zap.String("path", "/swagger/index.html"))
+	}
 
 	api := router.Group("/api/v1")
 	{

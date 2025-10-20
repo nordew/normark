@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/user/normark/internal/dto"
 	"github.com/user/normark/internal/entity"
-	"github.com/user/normark/internal/storage"
+	bunstorage "github.com/user/normark/internal/storage/bun"
 	"github.com/user/normark/internal/types"
 	"go.uber.org/zap"
 )
@@ -17,11 +17,11 @@ type TradingJournalEntryStorage interface {
 	Create(ctx context.Context, entry *entity.TradingJournalEntry) error
 	GetByID(ctx context.Context, id uuid.UUID) (*entity.TradingJournalEntry, error)
 	GetByIDWithJournal(ctx context.Context, id uuid.UUID) (*entity.TradingJournalEntry, error)
-	GetByJournalID(ctx context.Context, params storage.GetByJournalIDParams) ([]*entity.TradingJournalEntry, error)
-	GetByDateRange(ctx context.Context, params storage.GetByDateRangeParams) ([]*entity.TradingJournalEntry, error)
-	GetByAsset(ctx context.Context, params storage.GetByAssetParams) ([]*entity.TradingJournalEntry, error)
-	GetBySession(ctx context.Context, params storage.GetBySessionParams) ([]*entity.TradingJournalEntry, error)
-	GetByResult(ctx context.Context, params storage.GetByResultParams) ([]*entity.TradingJournalEntry, error)
+	GetByJournalID(ctx context.Context, params bunstorage.GetByJournalIDParams) ([]*entity.TradingJournalEntry, error)
+	GetByDateRange(ctx context.Context, params bunstorage.GetByDateRangeParams) ([]*entity.TradingJournalEntry, error)
+	GetByAsset(ctx context.Context, params bunstorage.GetByAssetParams) ([]*entity.TradingJournalEntry, error)
+	GetBySession(ctx context.Context, params bunstorage.GetBySessionParams) ([]*entity.TradingJournalEntry, error)
+	GetByResult(ctx context.Context, params bunstorage.GetByResultParams) ([]*entity.TradingJournalEntry, error)
 	Update(ctx context.Context, entry *entity.TradingJournalEntry) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	List(ctx context.Context, limit, offset int) ([]*entity.TradingJournalEntry, error)
@@ -108,7 +108,7 @@ func (s *TradingJournalEntryService) GetByIDWithJournal(ctx context.Context, id 
 }
 
 func (s *TradingJournalEntryService) GetJournalEntries(ctx context.Context, journalID uuid.UUID, limit, offset int) ([]*entity.TradingJournalEntry, error) {
-	entries, err := s.storage.GetByJournalID(ctx, storage.GetByJournalIDParams{
+	entries, err := s.storage.GetByJournalID(ctx, bunstorage.GetByJournalIDParams{
 		JournalID: journalID,
 		Limit:     limit,
 		Offset:    offset,
@@ -122,7 +122,7 @@ func (s *TradingJournalEntryService) GetJournalEntries(ctx context.Context, jour
 }
 
 func (s *TradingJournalEntryService) GetByDateRange(ctx context.Context, journalID uuid.UUID, startDate, endDate time.Time) ([]*entity.TradingJournalEntry, error) {
-	entries, err := s.storage.GetByDateRange(ctx, storage.GetByDateRangeParams{
+	entries, err := s.storage.GetByDateRange(ctx, bunstorage.GetByDateRangeParams{
 		JournalID: journalID,
 		StartDate: startDate,
 		EndDate:   endDate,
@@ -136,7 +136,7 @@ func (s *TradingJournalEntryService) GetByDateRange(ctx context.Context, journal
 }
 
 func (s *TradingJournalEntryService) GetByAsset(ctx context.Context, journalID uuid.UUID, asset types.CurrencyPair, limit, offset int) ([]*entity.TradingJournalEntry, error) {
-	entries, err := s.storage.GetByAsset(ctx, storage.GetByAssetParams{
+	entries, err := s.storage.GetByAsset(ctx, bunstorage.GetByAssetParams{
 		JournalID: journalID,
 		Asset:     asset,
 		Limit:     limit,
@@ -151,7 +151,7 @@ func (s *TradingJournalEntryService) GetByAsset(ctx context.Context, journalID u
 }
 
 func (s *TradingJournalEntryService) GetBySession(ctx context.Context, journalID uuid.UUID, session types.TradingSession, limit, offset int) ([]*entity.TradingJournalEntry, error) {
-	entries, err := s.storage.GetBySession(ctx, storage.GetBySessionParams{
+	entries, err := s.storage.GetBySession(ctx, bunstorage.GetBySessionParams{
 		JournalID: journalID,
 		Session:   session,
 		Limit:     limit,
@@ -166,7 +166,7 @@ func (s *TradingJournalEntryService) GetBySession(ctx context.Context, journalID
 }
 
 func (s *TradingJournalEntryService) GetByResult(ctx context.Context, journalID uuid.UUID, result types.TradeResult, limit, offset int) ([]*entity.TradingJournalEntry, error) {
-	entries, err := s.storage.GetByResult(ctx, storage.GetByResultParams{
+	entries, err := s.storage.GetByResult(ctx, bunstorage.GetByResultParams{
 		JournalID: journalID,
 		Result:    result,
 		Limit:     limit,

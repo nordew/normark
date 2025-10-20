@@ -13,7 +13,8 @@ import (
 	"github.com/user/normark/internal/config"
 	v1 "github.com/user/normark/internal/controller/http/v1"
 	"github.com/user/normark/internal/service"
-	"github.com/user/normark/internal/storage"
+	bunstorage "github.com/user/normark/internal/storage/bun"
+	"github.com/user/normark/internal/storage/cache"
 	"github.com/user/normark/pkg/auth"
 	"github.com/user/normark/pkg/db"
 	"go.uber.org/zap"
@@ -27,6 +28,7 @@ type App struct {
 	cfg    *config.Config
 	logger *zap.Logger
 	db     *db.DB
+	cache  *cache.Redis
 	server *http.Server
 }
 
@@ -54,6 +56,10 @@ func (a *App) Run() error {
 		return err
 	}
 
+	if err := a.initCache(ctx); err != nil {
+		return err
+	}
+
 	if err := a.initServer(); err != nil {
 		return err
 	}
@@ -73,6 +79,23 @@ func (a *App) initDatabase(ctx context.Context) error {
 	return nil
 }
 
+func (a *App) initCache(ctx context.Context) error {
+	redisCache := cache.New(cache.Config{
+		Addr:     a.cfg.Redis.Addr,
+		Password: a.cfg.Redis.Password,
+		DB:       a.cfg.Redis.DB,
+	})
+
+	if err := redisCache.Ping(ctx); err != nil {
+		a.logger.Warn("failed to connect to redis, continuing without cache", zap.Error(err))
+		return nil
+	}
+
+	a.cache = redisCache
+	a.logger.Info("redis cache connected successfully", zap.String("addr", a.cfg.Redis.Addr))
+	return nil
+}
+
 func (a *App) initServer() error {
 	jwtManager, err := auth.NewJWTManager(
 		a.cfg.JWT.Secret,
@@ -84,18 +107,36 @@ func (a *App) initServer() error {
 		return fmt.Errorf("failed to create jwt manager: %w", err)
 	}
 
-	userStorage := storage.NewUserStorage(a.db.DB)
+	userStorage := bunstorage.NewUserStorage(a.db.DB)
 	userService := service.NewUserService(userStorage, jwtManager, a.logger)
+	if a.cache != nil {
+		userService = userService.WithCache(a.cache)
+	}
 
-	tradingJournalStorage := storage.NewTradingJournalStorage(a.db.DB)
+	tradingJournalStorage := bunstorage.NewTradingJournalStorage(a.db.DB)
 	tradingJournalService := service.NewTradingJournalService(tradingJournalStorage, a.logger)
+	if a.cache != nil {
+		tradingJournalService = tradingJournalService.WithCache(a.cache)
+	}
 
-	tradingJournalEntryStorage := storage.NewTradingJournalEntryStorage(a.db.DB)
-	tradingJournalEntryService := service.NewTradingJournalEntryService(tradingJournalEntryStorage, tradingJournalStorage, a.logger)
+	tradingJournalEntryStorage := bunstorage.NewTradingJournalEntryStorage(a.db.DB)
+	tradingJournalEntryService := service.NewTradingJournalEntryService(
+		tradingJournalEntryStorage,
+		tradingJournalStorage,
+		a.logger,
+	)
 
 	middleware := v1.NewMiddleware(a.logger, jwtManager, &a.cfg.CORS)
 	rateLimiter := v1.NewRateLimiter(&a.cfg.RateLimit, a.logger)
-	handler := v1.NewHandler(userService, tradingJournalService, tradingJournalEntryService, a.logger, middleware, rateLimiter)
+	handler := v1.NewHandler(
+		userService,
+		tradingJournalService,
+		tradingJournalEntryService,
+		a.logger,
+		middleware,
+		rateLimiter,
+		a.cfg.App.Environment,
+	)
 
 	router := handler.InitRoutes()
 
@@ -145,6 +186,13 @@ func (a *App) shutdown() error {
 	if err := a.server.Shutdown(ctx); err != nil {
 		a.logger.Error("server shutdown error", zap.Error(err))
 		return fmt.Errorf("server shutdown error: %w", err)
+	}
+
+	if a.cache != nil {
+		if err := a.cache.Close(); err != nil {
+			a.logger.Error("cache close error", zap.Error(err))
+			return fmt.Errorf("cache close error: %w", err)
+		}
 	}
 
 	if err := a.db.Close(); err != nil {

@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/cockroachdb/errors"
 	"github.com/google/uuid"
@@ -25,6 +27,7 @@ type UserStorage interface {
 
 type UserService struct {
 	storage    UserStorage
+	cache      Cache
 	jwtManager *auth.JWTManager
 	logger     *zap.Logger
 }
@@ -39,6 +42,11 @@ func NewUserService(
 		jwtManager: jwtManager,
 		logger:     logger,
 	}
+}
+
+func (s *UserService) WithCache(cache Cache) *UserService {
+	s.cache = cache
+	return s
 }
 
 func (s *UserService) SignUp(ctx context.Context, req *dto.SignUpRequest) (*dto.AuthResponse, error) {
@@ -73,6 +81,13 @@ func (s *UserService) SignUp(ctx context.Context, req *dto.SignUpRequest) (*dto.
 		return nil, errors.Wrap(err, "failed to generate tokens")
 	}
 
+	if s.cache != nil {
+		cacheKey := fmt.Sprintf("token:access:%s", user.ID.String())
+		if err := s.cache.Set(ctx, cacheKey, tokens.AccessToken, time.Until(tokens.ExpiresAt)); err != nil {
+			s.logger.Warn("failed to cache access token", zap.Error(err))
+		}
+	}
+
 	return &dto.AuthResponse{
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
@@ -96,6 +111,13 @@ func (s *UserService) SignIn(ctx context.Context, req *dto.SignInRequest) (*dto.
 	if err != nil {
 		s.logger.Error("failed to generate tokens", zap.Error(err))
 		return nil, errors.Wrap(err, "failed to generate tokens")
+	}
+
+	if s.cache != nil {
+		cacheKey := fmt.Sprintf("token:access:%s", user.ID.String())
+		if err := s.cache.Set(ctx, cacheKey, tokens.AccessToken, time.Until(tokens.ExpiresAt)); err != nil {
+			s.logger.Warn("failed to cache access token", zap.Error(err))
+		}
 	}
 
 	return &dto.AuthResponse{

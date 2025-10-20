@@ -4,6 +4,7 @@ type Config struct {
 	App       App
 	Server    Server
 	Postgres  Postgres
+	Redis     Redis
 	JWT       JWT
 	CORS      CORS
 	RateLimit RateLimit
@@ -24,6 +25,12 @@ type Postgres struct {
 	Password string `env:"POSTGRES_PASSWORD,required"`
 	Database string `env:"POSTGRES_DB" envDefault:"postgres"`
 	SSLMode  string `env:"POSTGRES_SSL_MODE" envDefault:"disable"`
+}
+
+type Redis struct {
+	Addr     string `env:"REDIS_ADDR" envDefault:"localhost:6379"`
+	Password string `env:"REDIS_PASSWORD" envDefault:""`
+	DB       int    `env:"REDIS_DB" envDefault:"0"`
 }
 
 type JWT struct {
